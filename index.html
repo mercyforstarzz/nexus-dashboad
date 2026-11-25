@@ -1,0 +1,141 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Project Stellar • Nexus Porting</title><meta name="theme-color" content="#030712">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#030712;--star:#ffb347;--ice:#8fe3ff;--ink:#f1f5ff;--mute:#8d9ab8;--line:rgba(255,255,255,.1);--glass:rgba(255,255,255,.05)}
+*{box-sizing:border-box;margin:0}html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 'Space Grotesk',system-ui,sans-serif;overflow-x:hidden}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.haze{position:fixed;inset:-20%;z-index:0;pointer-events:none;background:radial-gradient(40% 35% at 15% 15%,rgba(255,179,71,.14),transparent),radial-gradient(40% 40% at 85% 80%,rgba(143,227,255,.12),transparent);filter:blur(30px);animation:drift 20s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(3%,2%,0) scale(1.08)}}
+h1,h2,h3,.logo{font-family:Syne,system-ui,sans-serif}
+#intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;text-align:center;padding:20px;cursor:pointer;transition:opacity 1.1s,visibility 1.1s}
+#intro.hide{opacity:0;visibility:hidden}
+#intro p{color:var(--ice);letter-spacing:.35em;opacity:0;animation:fi 1s 1.2s forwards}
+#intro h1{font-size:clamp(38px,11vw,120px);line-height:1;font-weight:800;display:flex;justify-content:center;flex-wrap:wrap;margin-top:14px}
+#intro h1 span{opacity:0;filter:blur(14px);transform:scale(1.5);animation:rise 1s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i)*70ms + 900ms);background:linear-gradient(180deg,#fff 30%,var(--star));-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes rise{to{opacity:1;filter:none;transform:none}}@keyframes fi{to{opacity:1}}
+#login{display:none;min-height:100svh;place-items:center;padding:20px;position:relative;z-index:2}
+.card{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:22px}
+.card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(280px circle at var(--mx,50%) var(--my,0),rgba(255,179,71,.18),transparent 60%)}
+.card:hover::before{opacity:1}
+.gate{max-width:420px;width:100%;text-align:center;padding:36px 28px}
+.gate h2{font-size:30px;margin-bottom:6px}.gate p{color:var(--mute);margin-bottom:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:12px 20px;font:600 15px 'Space Grotesk';color:#1a1100;background:linear-gradient(135deg,#ffd27a,var(--star));cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none;box-shadow:0 6px 24px rgba(255,179,71,.25)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(255,179,71,.4)}.btn:disabled{opacity:.5;pointer-events:none}
+.btn.dc{background:#5865f2;color:#fff;box-shadow:0 6px 24px rgba(88,101,242,.35);width:100%}
+.btn.ghost{background:var(--glass);color:var(--ink);box-shadow:none;border:1px solid var(--line);padding:8px 14px;font-size:13px}
+.btn.red{background:#ff5a6a;color:#fff;box-shadow:none}
+.err{color:#ff8a95;margin-bottom:16px;min-height:0}
+#app{display:none;position:relative;z-index:2;min-height:100svh;grid-template-columns:240px 1fr}
+.side{position:sticky;top:0;height:100svh;padding:24px 14px;display:flex;flex-direction:column;gap:6px;border-right:1px solid var(--line);background:rgba(3,7,18,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.logo{font-size:20px;font-weight:800;padding:0 10px 20px}.logo small{display:block;font:500 12px 'Space Grotesk';color:var(--mute)}
+.nv{display:flex;align-items:center;gap:10px;background:none;border:0;color:var(--mute);font:500 15px 'Space Grotesk';padding:11px 12px;border-radius:10px;cursor:pointer;transition:.2s}
+.nv:hover{color:var(--ink);background:var(--glass)}.nv.on{color:#1a1100;background:linear-gradient(135deg,#ffd27a,var(--star))}
+.user{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px;font-size:13px}
+.user img,.user i{width:34px;height:34px;border-radius:50%;background:var(--glass);flex:none}.user a{color:var(--mute);font-size:12px}
+main{padding:32px;max-width:1080px;width:100%}
+.v{display:none}.v.on{display:block;animation:up .45s cubic-bezier(.2,.8,.2,1)}@keyframes up{from{opacity:0;transform:translateY(12px)}}
+h2.t{font-size:clamp(26px,4vw,38px);margin-bottom:4px}.sub{color:var(--mute);margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px}
+.stat b{display:block;font:800 40px Syne;color:var(--star)}.stat span{color:var(--mute)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{display:block;color:var(--mute);font-size:13px;margin:12px 0 5px}
+input,select,textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:11px 12px;font:15px 'Space Grotesk';outline:none;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--star);box-shadow:0 0 0 3px rgba(255,179,71,.18)}
+textarea{min-height:110px;resize:vertical}.chk{display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--ink)}.chk input{width:auto}
+form .btn{margin-top:18px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}.row small{color:var(--mute);display:block}
+.pv{background:#2b2d31;border-left:4px solid var(--star);border-radius:6px;padding:12px 14px;margin-top:8px;min-height:80px}.pv b{display:block;margin-bottom:4px}.pv div{white-space:pre-wrap;color:#dbdee1;font-size:14px}
+#toasts{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:200;display:grid;gap:8px}
+.toast{background:#13213a;border:1px solid var(--line);border-left:3px solid var(--star);padding:12px 16px;border-radius:10px;animation:up .3s}.toast.bad{border-left-color:#ff5a6a}
+:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+@media(max-width:800px){
+ #app{grid-template-columns:1fr}.two{grid-template-columns:1fr}
+ .side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;flex-direction:row;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom));border:0;border-top:1px solid var(--line);z-index:50}
+ .logo,.user{display:none}.nv{flex-direction:column;gap:2px;font-size:11px;padding:8px 10px}
+ main{padding:calc(20px + env(safe-area-inset-top)) 14px 110px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+</style></head><body>
+<canvas id="sky"></canvas><div class="haze"></div>
+<div id="intro"><div><p>Nexus Porting presents</p><h1 aria-label="Project Stellar"></h1></div></div>
+
+<section id="login"><div class="card gate"><h2>Project Stellar</h2><p>Control room for the Nexus Porting community. Sign in with Discord to continue.</p>
+<div class="err" id="err"></div><a class="btn dc" href="/auth/login">Sign in with Discord</a></div></section>
+
+<div id="app">
+<aside class="side"><div class="logo">Stellar<small id="sname">Nexus Porting</small></div>
+<button class="nv on" data-v="ov">◈ Overview</button><button class="nv" data-v="gw">✦ Giveaways</button>
+<button class="nv" data-v="an">✉ Announce</button><button class="nv" data-v="md" data-admin>⚑ Moderation</button>
+<div class="user"><i id="av"></i><div><b id="un"></b><br><a href="/auth/logout">Sign out</a></div></div></aside>
+<main>
+<section class="v on" id="ov"><h2 class="t">Overview</h2><p class="sub">Live numbers from the Nexus Porting server.</p>
+<div class="grid"><div class="card stat"><b id="m">0</b><span>Members</span></div><div class="card stat"><b id="b">0</b><span>Boosts</span></div><div class="card stat"><b id="r">0</b><span>Roles</span></div><div class="card stat"><b id="p">0</b><span>Bot ping (ms)</span></div></div>
+<div class="card" data-admin><h3>Bot status</h3><form data-api="status" data-ok="Status updated"><label>Playing</label><input name="text" maxlength="100" required placeholder="Project Stellar"><button class="btn">Update status</button></form></div></section>
+
+<section class="v" id="gw"><h2 class="t">Giveaways</h2><p class="sub">Launch, end and reroll without leaving the dashboard.</p>
+<div class="two"><div class="card"><h3>Start a giveaway</h3><form data-api="giveaway" data-ok="Giveaway started">
+<label>Channel</label><select class="ch" name="channel" required></select><label>Prize</label><input name="prize" required maxlength="200">
+<div class="two"><div><label>Minutes</label><input name="minutes" type="number" min="1" value="60" required></div><div><label>Winners</label><input name="winners" type="number" min="1" value="1" required></div></div>
+<button class="btn">Start giveaway</button></form></div>
+<div class="card"><h3>Recent giveaways</h3><div id="gl"><p class="sub">Nothing yet. Start one to see it here.</p></div></div></div></section>
+
+<section class="v" id="an"><h2 class="t">Announce</h2><p class="sub">Send a styled embed to any channel.</p>
+<div class="two"><div class="card"><form data-api="announce" data-ok="Announcement sent" id="af"><label>Channel</label><select class="ch" name="channel" required></select>
+<label>Title</label><input name="title" required maxlength="250"><label>Message</label><textarea name="body" required maxlength="3500"></textarea>
+<label class="chk"><input type="checkbox" name="ping">Ping @everyone</label><button class="btn">Send announcement</button></form></div>
+<div class="card"><h3>Preview</h3><div class="pv"><b id="pt">Title</b><div id="pb">Your message appears here.</div></div></div></div></section>
+
+<section class="v" id="md"><h2 class="t">Moderation</h2><p class="sub">Actions are logged with your Discord ID. Staff can't be targeted.</p>
+<div class="card" style="max-width:520px"><form data-api="mod" data-ok="Action applied" data-confirm><label>Action</label><select name="action"><option value="timeout">Timeout</option><option value="kick">Kick</option><option value="ban">Ban</option></select>
+<label>User ID</label><input name="user" required inputmode="numeric" pattern="\d{15,21}"><label>Timeout minutes</label><input name="minutes" type="number" min="1" value="10"><label>Reason</label><input name="reason" maxlength="200">
+<button class="btn red">Apply action</button></form></div></section>
+</main></div><div id="toasts"></div>
+
+<script>
+const $=(s,e=document)=>e.querySelector(s),$$=s=>[...document.querySelectorAll(s)],rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(p,body){const r=await fetch('/api/'+p,{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body&&JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||'Request failed ('+r.status+')');return j}
+async function job(p,b){const {id}=await api(p,b);for(let i=0;i<15;i++){await new Promise(r=>setTimeout(r,1000));const r=await fetch('/api/result/'+id);if(r.status==200){const j=await r.json();if(!j.ok)throw Error(j.error||'Failed');return}}throw Error('Bot did not respond. Is it running?')}
+function toast(m,bad){const t=document.createElement('div');t.className='toast'+(bad?' bad':'');t.textContent=m;$('#toasts').append(t);setTimeout(()=>t.remove(),3500)}
+
+/* warp-speed starfield: the opening moment, then a calm drift */
+const cv=$('#sky'),x=cv.getContext('2d');let W,H,S=[],v=rm?1:46,mx=0,my=0;
+function size(){W=cv.width=innerWidth;H=cv.height=innerHeight;S=Array.from({length:Math.min(320,Math.floor(W/4))},()=>({x:(Math.random()-.5)*W*2,y:(Math.random()-.5)*H*2,z:Math.random()*W,g:Math.random()<.15}))}
+size();addEventListener('resize',size);
+function frame(){x.fillStyle='rgba(3,7,18,'+(v>5?.28:.5)+')';x.fillRect(0,0,W,H);v+=(1.1-v)*.018;
+ for(const s of S){const pz=s.z;s.z-=v;if(s.z<1){s.x=(Math.random()-.5)*W*2;s.y=(Math.random()-.5)*H*2;s.z=W;continue}
+  const k=W/s.z,px=W/2+s.x*k+mx*s.z*-.03,py=H/2+s.y*k+my*s.z*-.03,qk=W/pz,qx=W/2+s.x*qk+mx*pz*-.03,qy=H/2+s.y*qk+my*pz*-.03;
+  x.strokeStyle=s.g?'rgba(255,179,71,.9)':'rgba(190,225,255,'+Math.min(1,k*.9)+')';x.lineWidth=Math.min(2.2,k*1.2);x.beginPath();x.moveTo(qx,qy);x.lineTo(px,py);x.stroke()}
+ if(!rm)requestAnimationFrame(frame)}
+frame();
+addEventListener('pointermove',e=>{mx=e.clientX-innerWidth/2;my=e.clientY-innerHeight/2;const c=e.target.closest?.('.card');if(c){const r=c.getBoundingClientRect();c.style.setProperty('--mx',e.clientX-r.left+'px');c.style.setProperty('--my',e.clientY-r.top+'px')}});
+
+/* intro */
+$('#intro h1').innerHTML='PROJECT STELLAR'.split('').map((c,i)=>`<span style="--i:${i}">${c===' '?'&nbsp;':c}</span>`).join('');
+const endIntro=()=>$('#intro').classList.add('hide');setTimeout(endIntro,rm?200:3600);$('#intro').onclick=endIntro;
+
+/* nav */
+$$('.nv').forEach(b=>b.onclick=()=>{$$('.nv,.v').forEach(e=>e.classList.remove('on'));b.classList.add('on');$('#'+b.dataset.v).classList.add('on');scrollTo({top:0})});
+
+function count(sel,to){const e=$(sel),f=+e.dataset.v||0;e.dataset.v=to;const t0=performance.now();(function s(t){const k=Math.min(1,(t-t0)/900);e.textContent=Math.round(f+(to-f)*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(s)})(t0)}
+function ago(ts){const d=Math.round(ts-Date.now()/1000);if(d<=0)return'ended';const m=Math.floor(d/60);return m>=60?Math.floor(m/60)+'h '+m%60+'m left':m+'m left'}
+async function load(){try{const s=await api('stats');$('#sname').textContent=s.name;count('#m',s.members);count('#b',s.boosts);count('#r',s.roles);count('#p',s.ping);
+ $$('select.ch').forEach(sel=>{const cur=sel.value;sel.innerHTML=s.channels.map(c=>`<option value="${esc(c.id)}">#${esc(c.name)}</option>`).join('');if(cur)sel.value=cur});
+ if(s.giveaways.length)$('#gl').innerHTML=s.giveaways.map(g=>`<div class="row"><div><b>${esc(g.prize)}</b><small>${g.entries} entries • ${g.winners} winner${g.winners>1?'s':''} • ${g.ended?'ended':ago(g.end)}</small></div><button class="btn ghost" data-id="${esc(g.id)}">${g.ended?'Reroll':'End now'}</button></div>`).join('')}
+ catch(e){toast(e.message,1)}}
+$('#gl').onclick=async e=>{const b=e.target.closest('button[data-id]');if(!b)return;b.disabled=1;try{await job('giveaway/end',{id:b.dataset.id});toast('Winners drawn');load()}catch(x){toast(x.message,1)}};
+
+$$('form[data-api]').forEach(f=>f.onsubmit=async e=>{e.preventDefault();if(f.dataset.confirm&&!confirm('Apply this action?'))return;const b=f.querySelector('button');b.disabled=1;
+ const d=Object.fromEntries(new FormData(f));f.querySelectorAll('[type=checkbox]').forEach(c=>d[c.name]=c.checked);
+ try{await job(f.dataset.api,d);toast(f.dataset.ok);f.querySelectorAll('input:not([type=number]),textarea').forEach(i=>i.type=='checkbox'?i.checked=false:i.value='');pv();load()}catch(x){toast(x.message,1)}b.disabled=0});
+const pv=()=>{const f=$('#af');$('#pt').textContent=f.title.value||'Title';$('#pb').textContent=f.body.value||'Your message appears here.'};$('#af').oninput=pv;
+
+/* boot */
+const E={denied:"Your account doesn't have the dashboard role in Nexus Porting.",state:'Sign-in expired. Try again.',token:'Discord sign-in failed. Try again.'};
+(async()=>{try{const me=await api('me');$('#login').remove();$('#app').style.display='grid';$('#un').textContent=me.name;
+ if(me.avatar)$('#av').outerHTML=`<img id="av" alt="" src="https://cdn.discordapp.com/avatars/${me.id}/${me.avatar}.png?size=64">`;
+ if(!me.admin)$$('[data-admin]').forEach(e=>e.remove());load();setInterval(load,15000)}
+ catch{$('#login').style.display='grid';$('#err').textContent=E[new URLSearchParams(location.search).get('e')]||''}})();
+</script></body></html>
